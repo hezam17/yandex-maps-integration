@@ -13,7 +13,7 @@ class YandexReviewsService
 {
     private const APIFY_BASE      = 'https://api.apify.com/v2';
     private const MAX_REVIEWS     = 200;
-    private const RUN_TIMEOUT_SEC = 600; 
+    private const RUN_TIMEOUT_SEC = 600;
     private const POLL_INTERVAL   = 5;
 
     private string $token;
@@ -117,34 +117,7 @@ class YandexReviewsService
     // ─────────────────────────────────────────────────────────────────────────
     // Step 1 — Start Apify actor run
     // ─────────────────────────────────────────────────────────────────────────
-    // private function startRun(string $yandexUrl): array
-    // {
-    //     try {
-    //         $response = Http::timeout(30)
-    //             ->withToken($this->token)
-    //             ->post(self::APIFY_BASE . "/acts/{$this->actorId}/runs", [
-    //                 'startUrls'          => [['url' => $yandexUrl]],
-    //                 'maxResults'         => 1,
-    //                 'maxReviews'         => self::MAX_REVIEWS,
-    //                 'enrichBusinessData' => true, // ✅ تفعيل جلب التقييم العام وعدد المراجعات الكلي
-    //                 'language'           => 'ru',
-    //                 'proxyConfig'        => ['useApifyProxy' => true],
-    //             ]);
 
-    //         if (!$response->successful()) {
-    //             $msg = $response->json('error.message') ?? $response->body();
-    //             Log::error('Apify startRun failed', ['status' => $response->status(), 'msg' => $msg]);
-    //             return ['error' => "Apify error {$response->status()}: {$msg}"];
-    //         }
-
-    //         $data      = $response->json('data');
-    //         Log::info('Apify run started', ['run_id' => $data['id']]);
-    //         return ['run_id' => $data['id'], 'dataset_id' => $data['defaultDatasetId']];
-    //     } catch (\Throwable $e) {
-    //         Log::error('Apify startRun exception', ['msg' => $e->getMessage()]);
-    //         return ['error' => 'Network error: ' . $e->getMessage()];
-    //     }
-    // }
     private function startRun(string $yandexUrl): array
     {
         Log::info('Apify Test: Checking Token...', ['token_exists' => !empty($this->token)]);
@@ -177,7 +150,7 @@ class YandexReviewsService
 
             $data = $response->json('data');
             Log::info('Apify Test Success: Run started', ['run_id' => $data['id']]);
-            
+
             return ['run_id' => $data['id'], 'dataset_id' => $data['defaultDatasetId']];
         } catch (\Throwable $e) {
             Log::error('Apify Test Exception', ['message' => $e->getMessage()]);
@@ -219,34 +192,8 @@ class YandexReviewsService
     // ─────────────────────────────────────────────────────────────────────────
     // Step 3 — Fetch dataset items
     // ─────────────────────────────────────────────────────────────────────────
-    // private function fetchDataset(string $datasetId): array
-    // {
-    //     try {
-    //         $response = Http::timeout(60)
-    //             ->withToken($this->token)
-    //             ->get(self::APIFY_BASE . "/datasets/{$datasetId}/items", [
-    //                 'format' => 'json',
-    //                 'clean'  => true,
-    //                 'limit'  => self::MAX_REVIEWS + 10,
-    //             ]);
 
-    //         if (!$response->successful()) {
-    //             return ['error' => "Dataset fetch error: HTTP {$response->status()}"];
-    //         }
-
-    //         $items = $response->json();
-
-    //         if (!is_array($items)) {
-    //             return ['error' => 'Unexpected response format from Apify'];
-    //         }
-
-    //         Log::info('Apify dataset fetched', ['count' => count($items)]);
-    //         return $items;
-    //     } catch (\Throwable $e) {
-    //         return ['error' => 'Dataset exception: ' . $e->getMessage()];
-    //     }
-    // }
-private function fetchDataset(string $datasetId): array
+    private function fetchDataset(string $datasetId): array
     {
         Log::info('Apify Test: Fetching Dataset...', ['dataset_id' => $datasetId]);
 
@@ -263,7 +210,7 @@ private function fetchDataset(string $datasetId): array
             }
 
             Log::info('Apify Test: Data Received', ['count' => count($items), 'first_item_sample' => array_keys($items[0] ?? [])]);
-            
+
             return $items;
         } catch (\Throwable $e) {
             Log::error('Apify Test: Dataset Fetch Exception', ['msg' => $e->getMessage()]);

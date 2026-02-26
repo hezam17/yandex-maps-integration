@@ -5,7 +5,6 @@ import { computed, ref } from 'vue'
 const page  = usePage()
 const user  = computed(() => page.props.auth?.user)
 
-// حالة القائمة في الجوال
 const isSidebarOpen = ref(false)
 
 const toggleSidebar = () => {

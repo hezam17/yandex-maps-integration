@@ -36,17 +36,35 @@ class CompanySettingController extends Controller
             ],
         ]);
 
+        $originalUrl = $data['yandex_url'];
+
+        // 2. منطق تنظيف الرابط لاستخراج الـ OID وتحويله لرابط احترافي
+        if (preg_match('/(?:oid[=%3D]+|org\/.*\/|org\/)(\d+)/', $originalUrl, $matches)) {
+            $oid = $matches[1];
+            $finalUrl = "https://yandex.ru/maps/org/{$oid}/reviews/";
+        } else {
+            $finalUrl = $originalUrl;
+        }
+
+        // 3. الوصول للإعدادات الحالية وحذف المراجعات إذا تغير الرابط
+        $settings = $request->user()->companySetting;
+        if ($settings && $settings->yandex_url !== $finalUrl) {
+            // حذف المراجعات المرتبطة بهذا المستخدم لأن الرابط تغير
+            $settings->reviews()->delete();
+        }
+
+        // 4. تحديث الرابط الجديد أو إنشاء إعدادات جديدة
         $request->user()->companySetting()->updateOrCreate(
             ['user_id' => $request->user()->id],
             [
-                'yandex_url'           => $data['yandex_url'],
-                'last_synced_at'       => null,  // force re-sync on next load
+                'yandex_url'           => $finalUrl,
+                'last_synced_at'       => null,  // لفرض المزامنة في المرة القادمة
                 'yandex_rating'        => null,
                 'yandex_total_reviews' => null,
             ]
         );
 
-        return redirect('/reviews')->with('success', 'Настройки сохранены. Отзывы загружаются…');
+        return redirect('/reviews')->with('success', 'Настройки сохранены. Старые данные удалены, загружаем новые…');
     }
 
     // ─── GET /reviews  (Inertia page) ─────────────────────────────────────────
